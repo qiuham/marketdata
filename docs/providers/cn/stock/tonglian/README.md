@@ -26,6 +26,7 @@ ROOT/
 验证：
 
 ```bash
+cd ../trading-evaluation
 CN_BOOK_CHECK_PYTHON=/path/to/python \
   ./build/book-validate ROOT \
   --symbols 600006.SH,000030.SZ \

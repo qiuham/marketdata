@@ -59,5 +59,6 @@ normalized event
   `-> SPSC -> journal writer -> lifecycle index
 ```
 
-`book-validate` 是验证前端，不应成为长期存储实现。订单和成交查询最终读取公共
-journal/index，避免再次扫描供应商 Parquet 或维护另一套生命周期逻辑。
+同级仓库 `trading-evaluation` 中的 `book-validate` 是验证前端，不是长期存储
+实现。订单和成交查询读取公共 journal/index，避免再次扫描供应商 Parquet 或维护
+另一套生命周期逻辑。

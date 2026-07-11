@@ -16,8 +16,9 @@ mapper/venue normalizer
 ```
 
 顺序 journal 是 checkpoint 补放、问题复现、订单生命周期和成交反查的共同事实源。
-`book-validate` 只负责验证和可选导出 journal；订单与成交查询由 `event-trace`
-读取 journal 完成，不再反复扫描供应商 Parquet。
+`trading-evaluation` 仓库中的 `book-validate` 只负责验证和可选导出 journal；订单
+与成交查询由同仓库的 `event-trace` 读取 journal 完成，不再反复扫描供应商
+Parquet。
 
 `message_log.hpp` 保存 provider 原始 payload，`event_journal.hpp` 保存 normalized
 事件；前者用于重新解释原始数据，后者用于确定性重建和业务回溯，两者职责不同。

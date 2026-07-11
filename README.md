@@ -57,18 +57,17 @@ ctest --test-dir build --output-on-failure
 
 ```text
 marketdata-gateway       实时行情网关
-book-validate            沪深逐笔重建离线验证
 tonglian-mapper-bench    通联 mapper/序号热路径基准
 ```
 
 ## 约束
 
 - `trading-core` 是唯一标准事件和基础交易类型来源。
-- `orderbook` 是唯一订单簿和模拟撮合实现。
+- `orderbook` 是唯一订单簿实现；模拟撮合由 `venue-sim` 负责。
 - provider 特殊字段不进入 trading-core 或 orderbook。
 - 快照只用于离线验证，不修正生产 MBO。
 - 热路径默认无锁、无动态分配、无逐 tick 日志。
 - README、设计说明、必要注释、日志和用户提示统一使用中文。
 
-沪深逐笔重建结论与使用方法见 `docs/cn-stock-book-rebuild.md` 和
-`tools/book-validate/README.md`。
+沪深逐笔重建结论见 `docs/cn-stock-book-rebuild.md`；离线验证和回溯工具已迁移到
+同级仓库 `trading-evaluation`，避免生产行情仓库承担观察者职责。

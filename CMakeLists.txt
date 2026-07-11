@@ -73,22 +73,7 @@ if (MDF_BUILD_APPS)
                  apps/gateway/src/binance_live_runner.cpp)
   target_link_libraries(marketdata-gateway PRIVATE marketdata)
 
-  if (EXISTS "${MDF_ORDERBOOK_INCLUDE_DIR}/orderbook/rebuild/mbo_rebuilder.hpp"
-      AND EXISTS "${MDF_TRADING_CORE_INCLUDE_DIR}/trading/events/all.hpp")
-    add_executable(book-validate
-                   tools/book-validate/main.cpp
-                   tools/book-validate/book_validate.cpp)
-    target_include_directories(book-validate PRIVATE "${MDF_ORDERBOOK_INCLUDE_DIR}")
-    target_link_libraries(book-validate PRIVATE marketdata)
-
-    add_executable(event-trace tools/event-trace/main.cpp)
-    target_include_directories(event-trace PRIVATE "${MDF_ORDERBOOK_INCLUDE_DIR}")
-    target_link_libraries(event-trace PRIVATE marketdata)
-  else()
-    message(STATUS "Skipping book-validate: orderbook or trading-core headers not found")
-  endif()
-
-  if (EXISTS "${MDF_TRADING_CORE_INCLUDE_DIR}/trading/events/all.hpp")
+  if (EXISTS "${MDF_TRADING_CORE_INCLUDE_DIR}/trading/events/order_book.hpp")
     add_executable(tonglian-mapper-bench
                    tools/bench-tonglian-mapper/main.cpp)
     target_link_libraries(tonglian-mapper-bench
@@ -123,7 +108,7 @@ if (MDF_BUILD_TESTS)
   add_test(NAME binance_trade_mapper_smoke
            COMMAND mdf-binance-trade-mapper-smoke)
 
-  if (EXISTS "${MDF_TRADING_CORE_INCLUDE_DIR}/trading/events/all.hpp")
+  if (EXISTS "${MDF_TRADING_CORE_INCLUDE_DIR}/trading/events/order_book.hpp")
     add_executable(mdf-cn-stock-tonglian-mapper-smoke
                    tests/adapters/cn/stock/tonglian/mapper_smoke.cpp)
     target_link_libraries(mdf-cn-stock-tonglian-mapper-smoke PRIVATE marketdata)
@@ -161,7 +146,7 @@ if (MDF_BUILD_TESTS)
   add_test(NAME trading_phase_tracker_smoke
            COMMAND mdf-trading-phase-tracker-smoke)
 
-  if (EXISTS "${MDF_TRADING_CORE_INCLUDE_DIR}/trading/events/all.hpp")
+  if (EXISTS "${MDF_TRADING_CORE_INCLUDE_DIR}/trading/events/order_book.hpp")
     add_executable(mdf-tonglian-sequence-gate-smoke
                    tests/adapters/cn/stock/tonglian/sequence_gate_smoke.cpp)
     target_link_libraries(mdf-tonglian-sequence-gate-smoke
