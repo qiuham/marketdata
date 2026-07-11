@@ -85,7 +85,8 @@ int main() {
   assert(mapped.publishable());
   assert(output.event_kind == trading::core::EventKind::Status);
   assert(output.status.status_type == trading::core::StatusType::TradingPhase);
-  assert(output.status.trading_phase == 2);
+  assert(output.status.trading_phase ==
+         trading::core::TradingPhase::Continuous);
 
   mapped = mapper.map(
       tl::OrderRow{.exchange_order_id = 43,

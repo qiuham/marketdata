@@ -58,7 +58,7 @@ namespace te = trading::events;
   fill_header(context, tc::EventKind::Status, view.exchange_ts_ns,
               view.event_seq, view.exchange_seq, event.header);
   event.status_type = tc::StatusType::TradingPhase;
-  event.trading_phase = static_cast<std::uint16_t>(view.trading_phase);
+  event.trading_phase = view.trading_phase;
   out = event;
   return {md::adapters::MapStatus::Mapped, true};
 }

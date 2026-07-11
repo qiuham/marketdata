@@ -212,7 +212,8 @@ int main() {
       status);
   assert(result.status == tl::MapStatus::Mapped);
   assert(status.header.exchange_seq == 112);
-  assert(status.trading_phase == 1);
+  assert(status.trading_phase ==
+         trading::core::TradingPhase::OpeningCall);
 
   result = tl::map_transaction_row(
       sh,

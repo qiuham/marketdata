@@ -20,7 +20,8 @@ class TradingPhaseTracker {
   [[nodiscard]] PhaseApplyStatus apply(
       const trading::events::Status& event) noexcept {
     if (event.status_type != trading::core::StatusType::TradingPhase ||
-        event.trading_phase == 0 || event.header.exchange_seq == 0) {
+        event.trading_phase == trading::core::TradingPhase::Unknown ||
+        event.header.exchange_seq == 0) {
       return PhaseApplyStatus::Unsupported;
     }
     if (event.header.exchange_seq == sequence_) {
@@ -34,11 +35,13 @@ class TradingPhaseTracker {
     return PhaseApplyStatus::Applied;
   }
 
-  [[nodiscard]] std::uint16_t phase() const noexcept { return phase_; }
+  [[nodiscard]] trading::core::TradingPhase phase() const noexcept {
+    return phase_;
+  }
   [[nodiscard]] std::uint64_t sequence() const noexcept { return sequence_; }
 
  private:
-  std::uint16_t phase_{};
+  trading::core::TradingPhase phase_{trading::core::TradingPhase::Unknown};
   std::uint64_t sequence_{};
 };
 
