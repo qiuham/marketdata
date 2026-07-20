@@ -15,7 +15,7 @@ int main() {
 
   cs::OrderMapOutput output{};
   auto result = mapper.map(
-      cs::OrderRow{.exchange_time_ns = 33'240'620'000'000ULL,
+      cs::OrderRow{.unix_time_ms = 1'776'388'440'620ULL,
                    .record_id = 110,
                    .set_id = 2,
                    .order_type = 'S',
@@ -23,9 +23,10 @@ int main() {
       output);
   assert(result.publishable());
   assert(output.event_kind == tc::EventKind::TradingPhaseUpdate);
+  assert(output.phase.header.exchange_ts_ns == 33'240'620'000'000ULL);
 
   result = mapper.map(
-      cs::OrderRow{.exchange_time_ns = 33'301'440'000'000ULL,
+      cs::OrderRow{.unix_time_ms = 1'776'388'501'440ULL,
                    .record_id = 74153,
                    .set_id = 2,
                    .order_id = 3674,
@@ -40,7 +41,7 @@ int main() {
   assert(output.order.header.exchange_seq == 74153);
 
   result = mapper.map(
-      cs::OrderRow{.exchange_time_ns = 33'313'350'000'000ULL,
+      cs::OrderRow{.unix_time_ms = 1'776'388'513'350ULL,
                    .record_id = 74320,
                    .set_id = 2,
                    .order_id = 118500,
@@ -56,7 +57,7 @@ int main() {
 
   te::BookTrade trade{};
   result = mapper.map(
-      cs::TradeRow{.exchange_time_ns = 33'900'250'000'000ULL,
+      cs::TradeRow{.unix_time_ms = 1'776'389'100'250ULL,
                    .record_id = 74584,
                    .channel = 2,
                    .trade_id = 74584,
@@ -72,7 +73,7 @@ int main() {
   assert(trade.aggressor_side == tc::AggressorSide::Unknown);
 
   result = mapper.map(
-      cs::TradeRow{.exchange_time_ns = 34'200'250'000'000ULL,
+      cs::TradeRow{.unix_time_ms = 1'776'389'400'250ULL,
                    .record_id = 74585,
                    .channel = 2,
                    .trade_id = 74585,

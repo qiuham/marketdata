@@ -33,7 +33,7 @@ struct MappingContext {
 // CSV读取只负责把十进制价格和数量转换成refdata规定的整数比例尺。mapper不解析
 // 字符串，也不把离线文件格式泄漏到统一事件。
 struct OrderRow {
-  tc::TimestampNs exchange_time_ns{};
+  std::uint64_t unix_time_ms{};
   tc::Sequence record_id{};
   tc::PartitionId set_id{};
   tc::OrderId order_id{};
@@ -45,7 +45,7 @@ struct OrderRow {
 };
 
 struct TradeRow {
-  tc::TimestampNs exchange_time_ns{};
+  std::uint64_t unix_time_ms{};
   tc::Sequence record_id{};
   tc::PartitionId channel{};
   tc::TradeId trade_id{};
@@ -79,10 +79,13 @@ class CsmarMapper {
     if (!continuity.accepted()) {
       return {{md::mappers::MapStatus::Ignored, false}, continuity};
     }
+    if (row.unix_time_ms == 0) {
+      return {{md::mappers::MapStatus::Invalid, false}, continuity};
+    }
 
     if (row.order_type == 'S') {
       const md::markets::cn::OrderView view{
-          .exchange_ts_ns = row.exchange_time_ns,
+          .exchange_ts_ns = exchange_time_ns(row.unix_time_ms),
           .event_seq = row.record_id,
           .exchange_seq = row.record_id,
           .partition_id = row.set_id,
@@ -101,7 +104,7 @@ class CsmarMapper {
 
     if (row.order_type == 'D') {
       const md::markets::cn::TransactionView view{
-          .exchange_ts_ns = row.exchange_time_ns,
+          .exchange_ts_ns = exchange_time_ns(row.unix_time_ms),
           .event_seq = row.record_id,
           .exchange_seq = row.record_id,
           .partition_id = row.set_id,
@@ -121,7 +124,7 @@ class CsmarMapper {
     }
 
     const md::markets::cn::OrderView view{
-        .exchange_ts_ns = row.exchange_time_ns,
+        .exchange_ts_ns = exchange_time_ns(row.unix_time_ms),
         .event_seq = row.record_id,
         .exchange_seq = row.record_id,
         .partition_id = row.set_id,
@@ -149,14 +152,15 @@ class CsmarMapper {
       return {{md::mappers::MapStatus::Ignored, false}, continuity};
     }
     const auto trade_id = row.trade_id != 0 ? row.trade_id : row.record_id;
-    if (context_.market == Market::Unknown || trade_id == 0 ||
+    if (context_.market == Market::Unknown || row.unix_time_ms == 0 ||
+        trade_id == 0 ||
         row.quantity <= 0 || row.price < 0 ||
         (row.buy_order_id == 0 && row.sell_order_id == 0)) {
       return {{md::mappers::MapStatus::Invalid, false}, continuity};
     }
 
     const md::markets::cn::TransactionView view{
-        .exchange_ts_ns = row.exchange_time_ns,
+        .exchange_ts_ns = exchange_time_ns(row.unix_time_ms),
         .event_seq = row.record_id,
         .exchange_seq = row.record_id,
         .partition_id = row.channel,
@@ -184,6 +188,16 @@ class CsmarMapper {
   }
 
  private:
+  // 希施玛UNIX字段是UTC epoch毫秒，而统一行情事件使用交易所本地日内纳秒。
+  // 中国市场固定UTC+8且无夏令时；先取模再加偏移，避免远期epoch乘加溢出。
+  [[nodiscard]] static constexpr tc::TimestampNs exchange_time_ns(
+      std::uint64_t unix_time_ms) noexcept {
+    constexpr std::uint64_t kDayMs = 86'400'000ULL;
+    constexpr std::uint64_t kShanghaiOffsetMs = 8ULL * 60 * 60 * 1'000;
+    return ((unix_time_ms % kDayMs + kShanghaiOffsetMs) % kDayMs) *
+           1'000'000ULL;
+  }
+
   [[nodiscard]] md::markets::cn::EventContext event_context() const noexcept {
     return {context_.source_id, context_.venue_id, context_.feed_id,
             context_.instrument_id, context_.trading_day};
